@@ -25,6 +25,7 @@ package com.raywenderlich.galacticon
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
@@ -52,6 +53,9 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
     recyclerView.layoutManager = linearLayoutManager
     adapter = RecyclerAdapter(photosList)
     recyclerView.adapter = adapter
+
+    setRecyclerViewScrollListener()
+
 
     imageRequester = ImageRequester(this)
   }
@@ -81,4 +85,20 @@ class MainActivity : AppCompatActivity(), ImageRequester.ImageRequesterResponse 
 
     }
   }
+  private fun setRecyclerViewScrollListener() {
+    recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+      override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+        super.onScrollStateChanged(recyclerView, newState)
+        val totalItemCount = recyclerView.layoutManager!!.itemCount
+        if (!imageRequester.isLoadingData && totalItemCount == lastVisibleItemPosition + 1) {
+          requestPhoto()
+        }
+      }
+    })
+  }
+
 }
+
+private val lastVisibleItemPosition: Int
+  get() = linearLayoutManager.findLastVisibleItemPosition()
+
